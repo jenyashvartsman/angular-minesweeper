@@ -1,13 +1,26 @@
-<div [style.grid-template-columns]="'repeat(' + cols + ', 32px)'"
-     [style.grid-template-rows]="'repeat(' + rows +', 32px)'"
-     class="game-grid">
-  @for (row of grid; track rowIndex; let rowIndex = $index) {
-    @for (cell of row; track celIndex; let celIndex = $index) {
-      <button class="game-grid__cell">
-        <!--🚩-->
-        <!--❔-->
-        <!--💥-->
-      </button>
+@if (game$ | async; as game) {
+  <div [style.grid-template-columns]="'repeat(' + game.cols + ', 32px)'"
+       [style.grid-template-rows]="'repeat(' + game.rows +', 32px)'"
+       class="game-grid">
+    @for (row of game.cells; track rowIndex; let rowIndex = $index) {
+      @for (cell of row; track colIndex; let colIndex = $index) {
+        <button class="game-grid__cell"
+                [class.game-grid__cell--reveled]="cell.reveled"
+                (click)="cellClick(rowIndex, colIndex)"
+                [disabled]="cell.reveled">
+          <!--🚩-->
+          <!--❔-->
+          <!--💥-->
+
+          @if (cell.reveled) {
+            @if (cell.isMine) {
+              💥
+            } @else if (cell.minesProximity > 0) {
+              {{ cell.minesProximity }}
+            }
+          }
+        </button>
+      }
     }
-  }
-</div>
+  </div>
+}
