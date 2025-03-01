@@ -20,4 +20,9 @@ export class GameGridComponent {
   cellClick(row: number, col: number): void {
     this.gameState.revealCell(row, col);
   }
+
+  cellRightClick(e: MouseEvent, row: number, col: number): void {
+    e.preventDefault();
+    this.gameState.flagCell(row, col);
+  }
 }

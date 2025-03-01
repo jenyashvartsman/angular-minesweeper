@@ -1,4 +1,19 @@
 <div class="game-info">
-  <span class="game-info__mines">Mines remaining: 10</span>
-  <h3 class="game-info__status">Game in progress</h3>
+  <span class="game-info__mines">Mines remaining: {{(flagsLeft$ | async)}}</span>
+  <h3 class="game-info__status">
+    @switch ((game$ | async)?.status) {
+      @case ('inProgress') {
+        Game in progress
+      }
+      @case ('won') {
+        Win !!!
+      }
+      @case ('lost') {
+        Lost !
+      }
+      @default {
+        Lets start !!!
+      }
+    }
+  </h3>
 </div>

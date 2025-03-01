@@ -7,31 +7,78 @@ import { GameDto } from '../dto/game.dto';
   providedIn: 'root',
 })
 export class GameState {
-  private game!: BehaviorSubject<GameDto>;
+  private readonly game: BehaviorSubject<GameDto> = new BehaviorSubject<GameDto>({
+    status: 'idle',
+    rows: 0,
+    cols: 0,
+    cells: [],
+  });
+  private readonly flagsLeft: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
   game$!: Observable<GameDto>;
+  flagsLeft$!: Observable<number>;
 
   constructor() {
     this.initGame();
     this.game$ = this.game.asObservable();
+    this.flagsLeft$ = this.flagsLeft.asObservable();
   }
 
   initGame(): void {
-    const game = this.createGame(10, 10, 10);
-    this.seedMines(game);
+    const flags = 10;
+    const rows = 10;
+    const cols = 10;
+
+    const game = this.createGame(rows, cols);
+    this.seedMines(game, flags);
     this.seedMinesProximity(game);
-    this.game = new BehaviorSubject<GameDto>(game);
+
+    this.game.next(game);
+    this.flagsLeft.next(flags);
   }
 
   revealCell(row: number, col: number): void {
     const game = this.game.getValue();
-    game.cells[row][col].reveled = true;
-    this.game.next(game);
+    if (game.status === 'idle' || game.status === 'inProgress') {
+      this.revealCellsProximity(game, row, col);
+
+      // @ts-ignore
+      if (game.status !== 'lost') {
+        this.updateGameStatus(game);
+      }
+
+      this.game.next(game);
+    }
   }
 
-  private createGame(rows: number, cols: number, flags: number): GameDto {
+  flagCell(row: number, col: number): void {
+    const game = this.game.getValue();
+
+    if (game.status === 'idle' || game.status === 'inProgress') {
+      const cell = game.cells[row][col];
+      const currentFlagsLeft = this.flagsLeft.getValue();
+
+      if (!cell.reveled) {
+        if (cell.marked === null && currentFlagsLeft > 0) {
+          cell.marked = 'flag';
+          this.flagsLeft.next(currentFlagsLeft - 1);
+        } else if (cell.marked === 'flag') {
+          cell.marked = 'question';
+          this.flagsLeft.next(currentFlagsLeft + 1);
+        } else {
+          cell.marked = null;
+        }
+      }
+
+      this.updateGameStatus(game);
+
+      this.game.next(game);
+    }
+  }
+
+  private createGame(rows: number, cols: number): GameDto {
     return {
-      flags,
+      status: 'idle',
       rows,
       cols,
       cells: Array.from({ length: rows }, () =>
@@ -45,14 +92,13 @@ export class GameState {
     };
   }
 
-  private seedMines(game: GameDto): void {
-    let count = game.flags;
-    while (count > 0) {
+  private seedMines(game: GameDto, minesCount: number): void {
+    while (minesCount > 0) {
       let r = Math.floor(Math.random() * game.rows);
       let c = Math.floor(Math.random() * game.cols);
       if (!game.cells[r][c].isMine) {
         game.cells[r][c].isMine = true;
-        count--;
+        minesCount--;
       }
     }
   }
@@ -79,5 +125,46 @@ export class GameState {
     if (game.cells[proximityRow] && game.cells[proximityRow][proximityCol]?.isMine) {
       currentCell.minesProximity++;
     }
+  }
+
+  private revealCellsProximity(game: GameDto, row: number, col: number): void {
+    if (!game.cells[row] || !game.cells[row][col]) {
+      return;
+    } else {
+      const cell = game.cells[row][col];
+
+      if (cell.reveled) {
+        return;
+      } else {
+        cell.reveled = true;
+
+        if (cell.isMine) {
+          game.status = 'lost';
+          return;
+        } else if (game.cells[row][col].minesProximity > 0) {
+          return;
+        } else {
+          game.cells[row][col].reveled = true;
+          this.revealCellsProximity(game, row - 1, col);
+          this.revealCellsProximity(game, row + 1, col);
+          this.revealCellsProximity(game, row, col - 1);
+          this.revealCellsProximity(game, row, col + 1);
+        }
+      }
+    }
+  }
+
+  private updateGameStatus(game: GameDto): void {
+    for (let i = 0; i < game.cells.length; i++) {
+      for (let j = 0; j < game.cells[i].length; j++) {
+        const cell = game.cells[i][j];
+        if (!cell.reveled && cell.marked !== 'flag') {
+          game.status = 'inProgress';
+          return;
+        }
+      }
+    }
+
+    game.status = 'won';
   }
 }

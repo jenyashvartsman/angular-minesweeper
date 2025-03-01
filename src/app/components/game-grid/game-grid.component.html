@@ -7,17 +7,18 @@
         <button class="game-grid__cell"
                 [class.game-grid__cell--reveled]="cell.reveled"
                 (click)="cellClick(rowIndex, colIndex)"
+                (contextmenu)="cellRightClick($event, rowIndex, colIndex)"
                 [disabled]="cell.reveled">
-          <!--🚩-->
-          <!--❔-->
-          <!--💥-->
-
           @if (cell.reveled) {
             @if (cell.isMine) {
               💥
             } @else if (cell.minesProximity > 0) {
               {{ cell.minesProximity }}
             }
+          } @else if (cell.marked === 'flag') {
+            🚩
+          } @else if (cell.marked === 'question') {
+            ❔
           }
         </button>
       }
