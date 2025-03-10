@@ -19,3 +19,11 @@
   border: 1px solid #3D3D3D;
   cursor: default;
 }
+
+.game-grid__cell--mine-clicked {
+ background-color: #d57171;
+}
+
+.game-grid__cell--mine-hidden {
+  background-color: #eaea6e;
+}

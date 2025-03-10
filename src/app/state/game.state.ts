@@ -45,6 +45,8 @@ export class GameState {
       // @ts-ignore
       if (game.status !== 'lost') {
         this.updateGameStatus(game);
+      } else {
+        this.revealMines(game);
       }
 
       this.game.next(game);
@@ -86,6 +88,8 @@ export class GameState {
           reveled: false,
           marked: null,
           isMine: false,
+          isMineClicked: false,
+          isMineHidden: true,
           minesProximity: 0,
         })),
       ),
@@ -140,6 +144,7 @@ export class GameState {
 
         if (cell.isMine) {
           game.status = 'lost';
+          cell.isMineClicked = true;
           return;
         } else if (game.cells[row][col].minesProximity > 0) {
           return;
@@ -166,5 +171,16 @@ export class GameState {
     }
 
     game.status = 'won';
+  }
+
+  private revealMines(game: GameDto): void {
+    for (let i = 0; i < game.cells.length; i++) {
+      for (let j = 0; j < game.cells[i].length; j++) {
+        const cell = game.cells[i][j];
+        if (cell.isMine) {
+          cell.reveled = true;
+        }
+      }
+    }
   }
 }

@@ -6,6 +6,8 @@
       @for (cell of row; track colIndex; let colIndex = $index) {
         <button class="game-grid__cell"
                 [class.game-grid__cell--reveled]="cell.reveled"
+                [class.game-grid__cell--mine-clicked]="cell.isMineClicked"
+                [class.game-grid__cell--mine-hidden]="!cell.isMineClicked && cell.reveled && cell.isMine && cell.isMineHidden"
                 (click)="cellClick(rowIndex, colIndex)"
                 (contextmenu)="cellRightClick($event, rowIndex, colIndex)"
                 [disabled]="cell.reveled">

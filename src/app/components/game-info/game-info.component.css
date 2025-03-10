@@ -11,4 +11,14 @@
   color: #fff;
   padding: 1rem 1.5rem;
   border-radius: 0.25rem;
+  height: 140px;
+}
+
+.game-info__button {
+  padding: 0.25rem 0.5rem;
+  background-color: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 0.3rem;
+  cursor: pointer;
 }

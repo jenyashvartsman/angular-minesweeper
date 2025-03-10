@@ -1,19 +1,27 @@
 <div class="game-info">
-  <span class="game-info__mines">Mines remaining: {{(flagsLeft$ | async)}}</span>
-  <h3 class="game-info__status">
-    @switch ((game$ | async)?.status) {
-      @case ('inProgress') {
-        Game in progress
+  <span class="game-info__mines">Mines remaining: {{ (flagsLeft$ | async) }}</span>
+
+  @if (game$ | async; as game) {
+    <h3 class="game-info__status">
+      @switch (game.status) {
+        @case ('inProgress') {
+          Game in progress
+        }
+        @case ('won') {
+          Win !!!
+        }
+        @case ('lost') {
+          Lost !
+        }
+        @default {
+          Lets start !!!
+        }
       }
-      @case ('won') {
-        Win !!!
-      }
-      @case ('lost') {
-        Lost !
-      }
-      @default {
-        Lets start !!!
-      }
+    </h3>
+
+    @if (game.status !== 'idle') {
+      <button class="game-info__button" (click)="restartClick()">Restart</button>
     }
-  </h3>
+  }
+
 </div>

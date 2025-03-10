@@ -18,4 +18,8 @@ export class GameInfoComponent {
     this.flagsLeft$ = this.gameState.flagsLeft$;
     this.game$ = this.gameState.game$;
   }
+
+  restartClick(): void {
+    this.gameState.initGame();
+  }
 }
